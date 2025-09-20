@@ -1,0 +1,29 @@
+### Health
+GET http://localhost:4000/api/health
+
+### Air Now (Houston)
+GET http://localhost:4000/api/air/now?lat=29.76&lon=-95.37
+
+### Best Window (12h)
+GET http://localhost:4000/api/air/best-window?lat=29.76&lon=-95.37&hours=12
+
+### Route Exposure (sample encoded polyline)
+GET http://localhost:4000/api/route/exposure?encoded=_p~iF~ps%7CU_ulLnnqC_mqNvxq%60%40
+
+### Log a diary entry
+POST http://localhost:4000/api/diary/log
+Content-Type: application/json
+
+{ "cough": 2, "wheeze": 1, "breath": 3, "note": "stairs" }
+
+### List diary entries
+GET http://localhost:4000/api/diary/list
+
+### Weekly summary
+GET http://localhost:4000/api/summary/weekly?lat=29.76&lon=-95.37
+
+### FHIR export
+GET http://localhost:4000/api/fhir/export
+
+### Weekly PDF (download)
+GET http://localhost:4000/api/summary/pdf

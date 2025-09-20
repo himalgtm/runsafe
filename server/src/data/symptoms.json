@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {
+      "id": "cc67d17e-c6e4-4a89-9cdc-82e44c02b058",
+      "ts": "2025-09-20T06:51:15.090Z",
+      "cough": 2,
+      "wheeze": 1,
+      "breath": 3,
+      "note": "stairs"
+    },
+    {
+      "id": "4375f67c-76b1-4232-b16a-db770a3e465f",
+      "ts": "2025-09-20T08:43:25.671Z",
+      "cough": 2,
+      "wheeze": 1,
+      "breath": 3,
+      "note": "stairs"
+    }
+  ]
+}
