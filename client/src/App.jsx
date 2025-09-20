@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
+import { Routes, Route, NavLink } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import RoutePage from "./pages/Route.jsx";
 import Diary from "./pages/Diary.jsx";
 import Summary from "./pages/Summary.jsx";
+import Profile from "./pages/Profile.jsx"; // ✅ NEW
 
 function NavItem({ to, children }) {
   return (
@@ -23,36 +24,33 @@ function NavItem({ to, children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      {/* Navbar */}
+    <>
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-slate-200 shadow-md">
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
-          {/* Left: Brand */}
           <div className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 font-extrabold text-2xl tracking-tight brand-glow drop-shadow-lg">
             RunSafe
           </div>
-
-          {/* Right: Navigation */}
           <nav className="flex items-center gap-3">
             <NavItem to="/">Here & Now</NavItem>
             <NavItem to="/route">Route</NavItem>
             <NavItem to="/diary">Diary</NavItem>
             <NavItem to="/summary">Summary</NavItem>
+            <NavItem to="/profile">Profile</NavItem> {/* ✅ NEW */}
           </nav>
         </div>
       </header>
 
-      {/* Routed pages render their own themed backgrounds */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/route" element={<RoutePage />} />
         <Route path="/diary" element={<Diary />} />
         <Route path="/summary" element={<Summary />} />
+        <Route path="/profile" element={<Profile />} />   {/* ✅ NEW */}
       </Routes>
 
       <footer className="py-8 text-center text-sm text-slate-500">
         Built for HackRice • Gemini + Cloudflare + MongoDB Atlas ready
       </footer>
-    </BrowserRouter>
+    </>
   );
 }
