@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global font */
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+/* Brand title gets Poppins */
+.brand-glow { font-family: 'Poppins', sans-serif; }
+
+/* Optional subtle soft shadow */
+.shadow-soft { box-shadow: 0 10px 30px rgba(2,6,23,.12); }
