@@ -1,25 +1,19 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.jsx";
-import "./index.css";
-import { Auth0Provider } from "@auth0/auth0-react";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './index.css';
+import { ClerkProvider } from '@clerk/clerk-react';
 
-const domain = import.meta.env.VITE_AUTH0_DOMAIN;
-const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
-const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <Auth0Provider
-      domain={domain}
-      clientId={clientId}
-      cacheLocation="localstorage"
-      authorizationParams={{
-        redirect_uri: window.location.origin,
-        audience,
-      }}
-    >
-      <App />
-    </Auth0Provider>
-  </React.StrictMode>
+if (!PUBLISHABLE_KEY) {
+	throw new Error('Missing Publishable Key');
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+	<React.StrictMode>
+		<ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+			<App />
+		</ClerkProvider>
+	</React.StrictMode>
 );
