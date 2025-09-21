@@ -17,8 +17,9 @@ export async function api(path, opts = {}) {
     ...rest
   } = opts;
 
-  const url = base ? `${base}${path}` : path;
-
+const url = base 
+  ? `${base}${path}` 
+  : `https://runsafe.vercel.app${path}`;
   const h = { ...headers };
   let payload = body;
 
