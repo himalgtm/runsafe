@@ -1,30 +1,34 @@
-import { PDFDocument, StandardFonts } from 'pdf-lib';
+// server/src/services/pdf.service.js
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import dayjs from 'dayjs';
 
-export async function weeklyPdf(entries) {
-  const to = dayjs();
-  const from = to.subtract(7, 'day');
+const REPL = { '→':'->','–':'-','—':'-','•':'*','·':'*','’':"'",'‘':"'",'“':'"','”':'"','≥':'>=','≤':'<=','×':'x','©':'(c)','™':'(TM)','\u00A0':' ' };
+const sanitize = s => String(s ?? '').replace(/[^\x20-\x7E]/g, ch => REPL[ch] ?? '?');
 
-  const week = entries.filter(e => dayjs(e.ts).isAfter(from));
-  const totals = week.reduce(
-    (a, e) => ({ c: a.c + (e.cough || 0), w: a.w + (e.wheeze || 0), b: a.b + (e.breath || 0) }),
-    { c: 0, w: 0, b: 0 }
-  );
+export async function weeklyPdf(summary = {}) {
+  const r = summary.range ?? {};
+  const start = r.start ?? r.from ?? dayjs().subtract(7,'day').format('YYYY-MM-DD');
+  const end   = r.end   ?? r.to   ?? dayjs().format('YYYY-MM-DD');
+
+  const totals  = summary.totals ?? { cough: 0, wheeze: 0, breath: 0 };
+  const entries = Array.isArray(summary.entries) ? summary.entries : [];
 
   const pdf = await PDFDocument.create();
   const page = pdf.addPage([612, 792]);
   const font = await pdf.embedFont(StandardFonts.Helvetica);
-  const draw = (text, y) => page.drawText(text, { x: 50, y, size: 12, font });
+  let y = 760;
 
-  let y = 740;
-  draw('RunSafe Weekly Provider Summary', y);        y -= 24;
-  draw(`Range: ${from.toISOString()} → ${to.toISOString()}`, y); y -= 18;
-  draw(`Totals — Cough:${totals.c}  Wheeze:${totals.w}  Breath:${totals.b}`, y); y -= 24;
+  const draw = (text, size = 12) => { page.drawText(sanitize(text), { x: 50, y, size, font, color: rgb(0,0,0) }); y -= size + 8; };
 
-  week.slice(-28).forEach(e => {
-    draw(`${e.ts}  c:${e.cough} w:${e.wheeze} b:${e.breath}${e.note ? ` - ${e.note}` : ''}`, y);
-    y -= 16;
+  draw('RunSafe: Weekly Provider Summary', 18);
+  draw(`${start} - ${end}`);
+  draw(`Totals: cough ${totals.cough}  wheeze ${totals.wheeze}  breath ${totals.breath}`);
+  draw('Recent entries:');
+  entries.slice(-8).forEach(e => {
+    const ts = e?.ts ? String(e.ts).slice(0,19) : '';
+    draw(`- ${ts}  c:${e.cough} w:${e.wheeze} b:${e.breath}${e.note ? ' - ' + e.note : ''}`);
   });
+  draw('Prototype only; not medical advice.', 10);
 
-  return pdf.save(); // Uint8Array
+  return pdf.save();
 }

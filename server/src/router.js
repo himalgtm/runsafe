@@ -1,10 +1,13 @@
 import { Router } from 'express';
 import { airNow, airBestWindow } from './api/air.controller.js';
-import { routeExposure } from './api/route.controller.js';
 import { diaryController } from './api/diary.controller.js';
 import { summaryController } from './api/summary.controller.js';
 import { fhirController } from './api/fhir.controller.js';
 import { pdfController } from './api/pdf.controller.js';
+import { aiController } from './api/ai.controller.js';
+import { routeController } from './api/route.controller.js'; 
+import { debugController } from './api/debug.controller.js';
+
 
 export function createRouter(store) {
   const r = Router();
@@ -12,7 +15,6 @@ export function createRouter(store) {
 
   r.get('/air/now', airNow);
   r.get('/air/best-window', airBestWindow);
-  r.get('/route/exposure', routeExposure);
 
   const diary = diaryController(store);
   r.post('/diary/log', diary.log);
@@ -26,6 +28,18 @@ export function createRouter(store) {
 
   const pdf = pdfController(store);
   r.get('/summary/pdf', pdf.weekly);
+
+  const ai = aiController(store);
+  r.get('/ai/advice', ai.advice);
+  r.get('/ai/coach', ai.coach);
+  r.get('/summary/weekly/ai', ai.weekly);
+
+  const route = routeController();
+  r.get('/route/exposure', route.exposure);
+  r.post('/route/exposure/batch', route.batch);
+
+  const dbg = debugController();
+  r.get('/debug/whoami', dbg.whoami);
 
   return r;
 }
