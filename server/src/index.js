@@ -9,10 +9,18 @@ import { createRouter } from './router.js';
 
 import { jsonStore } from './data/json.store.js';
 import { mongoStore } from './data/mongo.store.js';
+import cors from "cors";
 
 const app = express();
-
-// Core middleware (order matters)
+export const corsMw = cors({
+  origin: [
+    "https://runsafe-client.vercel.app", 
+    "http://localhost:5173",             
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true, 
+});
 app.use(corsMw);
 app.use(express.json({ limit: '512kb' }));
 
