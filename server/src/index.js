@@ -28,6 +28,9 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 // choose store
 const store = ENV.STORE_IMPL === 'mongo' ? mongoStore() : jsonStore();
 
+app.use('/', function(req,res){
+  res.send(200);
+})
 // mount API
 app.use('/api', createRouter(store));
 
