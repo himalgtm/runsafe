@@ -1,70 +1,40 @@
-import React from "react";
-
-export default function AqiGauge({ aqi }) {
-  // AQI ranges from 0–500
-  const radius = 90; // bigger radius
-  const strokeWidth = 18; // thicker ring
-  const circumference = 2 * Math.PI * radius;
-  const normalized = Math.min(aqi, 500);
-  const offset = circumference - (normalized / 500) * circumference;
-
-  // pick color by AQI category
-  function colorByAQI(val) {
-    if (val <= 50) return "#22c55e";   // green
-    if (val <= 100) return "#eab308";  // yellow
-    if (val <= 150) return "#f97316";  // orange
-    if (val <= 200) return "#ef4444";  // red
-    if (val <= 300) return "#8b5cf6";  // purple
-    return "#6b7280";                  // gray fallback
-  }
+// Simple semicircle gauge (0..150 -> -90..+90 degrees)
+export default function AqiGauge({ aqi = 62, label = "Moderate" }) {
+  const clamped = Math.max(0, Math.min(150, aqi));
+  const angle = -90 + (clamped / 150) * 180; // -90..+90
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <svg
-        className="w-56 h-56 -rotate-90 drop-shadow-lg"
-        viewBox="0 0 220 220"
-      >
-        {/* Background ring */}
-        <circle
-          cx="110"
-          cy="110"
-          r={radius}
-          fill="transparent"
-          stroke="#1e293b" // dark slate background
-          strokeWidth={strokeWidth}
-        />
-        {/* Progress ring */}
-        <circle
-          cx="110"
-          cy="110"
-          r={radius}
-          fill="transparent"
-          stroke={colorByAQI(aqi)}
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          style={{ transition: "stroke-dashoffset 1s ease-out" }}
-        />
-        {/* Marker dot at the end of arc */}
-        <circle
-          cx="110"
-          cy="110"
-          r={radius}
-          fill="transparent"
-          stroke="white"
-          strokeWidth="4"
-          strokeDasharray="1 565" // just one dot
-          strokeDashoffset={offset}
-          pathLength="565"
-        />
-      </svg>
-      <div className="mt-4 text-center">
-        <div className="text-5xl font-extrabold tracking-wide text-slate-100">
-          {aqi}
-        </div>
-        <div className="text-slate-400 text-lg font-medium">Air Quality Index</div>
+    <div className="relative w-full max-w-xl mx-auto">
+      {/* Arc background using conic gradient masked to half circle */}
+      <div
+        className="aspect-[2/1] rounded-b-[999px] overflow-hidden"
+        style={{
+          WebkitMaskImage:
+            "linear-gradient(black,black) top/100% 50% no-repeat, linear-gradient(transparent,transparent) bottom/100% 50% no-repeat",
+          WebkitMaskComposite: "xor",
+          maskComposite: "exclude",
+          background:
+            "conic-gradient(from 180deg, #10b981 0deg, #facc15 90deg, #f97316 135deg, #ef4444 170deg, #7c3aed 180deg)",
+        }}
+      />
+
+      {/* Face */}
+      <div className="absolute inset-0 flex items-end justify-center pb-6">
+        <div className="text-4xl md:text-5xl font-black tracking-tight text-slate-900">{label}</div>
       </div>
+
+      {/* Needle */}
+      <div
+        className="absolute left-1/2 bottom-[44%] h-[2px] w-[40%] origin-left"
+        style={{ transform: `rotate(${angle}deg)` }}
+      >
+        <div className="h-full w-full bg-white shadow-[0_0_6px_rgba(0,0,0,0.25)]" />
+        <div className="absolute -right-2 -top-1 h-3.5 w-3.5 rounded-full bg-white shadow" />
+      </div>
+
+      {/* Scale labels */}
+      <div className="absolute left-[14%] bottom-3 text-xs text-slate-500">0</div>
+      <div className="absolute right-[12%] bottom-3 text-xs text-slate-500">50</div>
     </div>
   );
 }

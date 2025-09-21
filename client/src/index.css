@@ -2,10 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* helpers used in the UI */
-@keyframes pingDot {
-  0% { transform: scale(0.9); opacity: 0.9; }
-  70% { transform: scale(1.25); opacity: 0.2; }
-  100% { transform: scale(0.9); opacity: 0.9; }
+/* Apply Apple font stack globally */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
-.live-dot { width: 8px; height: 8px; border-radius: 9999px; animation: pingDot 1.4s infinite; }
+
+/* Hide the text caret for all non-editable elements */
+*:not(input):not(textarea):not([contenteditable="true"]) {
+  caret-color: transparent;
+}
+
+/* Optional: make sure the cursor is normal on headings/labels etc. */
+h1, h2, h3, h4, h5, h6, p, span, label, strong, em, small, li, dt, dd {
+  cursor: default;
+  user-select: text; /* keep selection if you like; remove if you want no selection */
+}
+
+/* If you also want to prevent selecting static headings entirely, use: */
+/* .select-none { user-select: none; } (Tailwind class already available) */
+

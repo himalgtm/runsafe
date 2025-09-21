@@ -1,11 +1,25 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
-import "./index.css";   // ✅ IMPORTANT: loads Tailwind
+import "./index.css";
+import { Auth0Provider } from "@auth0/auth0-react";
+
+const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
+  <React.StrictMode>
+    <Auth0Provider
+      domain={domain}
+      clientId={clientId}
+      cacheLocation="localstorage"
+      authorizationParams={{
+        redirect_uri: window.location.origin,
+        audience,
+      }}
+    >
+      <App />
+    </Auth0Provider>
+  </React.StrictMode>
 );

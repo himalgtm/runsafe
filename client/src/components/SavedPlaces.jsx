@@ -1,73 +1,66 @@
 import { useEffect, useState } from "react";
-import Card from "./Card.jsx";
-import Chip from "./Chip.jsx";
-import { loadPlaces, savePlaces } from "../utils/places.js";
-import { quickAQI, bestWindows } from "../utils/air.js";
+import { api } from "../services/api";
 
-export default function SavedPlaces(){
-  const [places, setPlaces] = useState(loadPlaces()); // [{name,lat,lon}]
-  const [chips, setChips] = useState({}); // name -> windows
+const KEY = "runsafe_places"; // [{id,name,lat,lon}]
 
-  function addPlace(){
-    const name = prompt("Place name (e.g., Home):");
-    const lat = parseFloat(prompt("Latitude:"));
-    const lon = parseFloat(prompt("Longitude:"));
-    if (!name || Number.isNaN(lat) || Number.isNaN(lon)) return;
-    const next = [...places, {name, lat, lon}];
-    setPlaces(next); savePlaces(next);
+function load() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; } }
+function save(list) { localStorage.setItem(KEY, JSON.stringify(list)); }
+
+export default function SavedPlaces({ onPick }) {
+  const [places, setPlaces] = useState(load());
+  const [name, setName] = useState("");
+  const [lat, setLat] = useState("");
+  const [lon, setLon] = useState("");
+  const [preview, setPreview] = useState(null);
+
+  useEffect(() => save(places), [places]);
+
+  async function quickCheck(p) {
+    const res = await api(`/api/air/now?lat=${p.lat}&lon=${p.lon}`);
+    setPreview({ place: p, aqi: res.aqi, label: res.forecastLabel ?? res.todayLabel ?? "" });
+    onPick?.(p, res);
   }
-  function removePlace(name){
-    const next = places.filter(p=>p.name!==name);
-    setPlaces(next); savePlaces(next);
+
+  function add() {
+    if (!name || !lat || !lon) return;
+    const id = crypto.randomUUID();
+    const item = { id, name, lat: +lat, lon: +lon };
+    setPlaces([...places, item]);
+    setName(""); setLat(""); setLon("");
   }
 
-  useEffect(()=>{
-    (async ()=>{
-      const out = {};
-      for (const p of places){
-        const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${p.lat}&longitude=${p.lon}&hourly=pm2_5,ozone,no2&timezone=auto`;
-        const data = await fetch(url).then(r=>r.json());
-        const now = new Date().toISOString().slice(0,13);
-        const idx = data.hourly.time.findIndex(t => t.startsWith(now));
-        const series = data.hourly.time.slice(idx, idx+12).map((_,k)=> quickAQI(
-          data.hourly.pm2_5[idx+k], data.hourly.ozone[idx+k], data.hourly.no2[idx+k]
-        ));
-        out[p.name] = bestWindows(series, 12);
-      }
-      setChips(out);
-    })();
-  },[places]);
+  function remove(id) { setPlaces(places.filter(p => p.id !== id)); }
 
   return (
-    <Card title="Saved places (6–12h outlook)" className="lg:col-span-3 border-t-4 border-teal-400">
-      <div className="flex flex-wrap gap-2 mb-3">
-        {places.map(p=>(
-          <span key={p.name} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-sm">
-            {p.name}
-            <button onClick={()=>removePlace(p.name)} className="text-slate-500 hover:text-rose-600">×</button>
-          </span>
-        ))}
-        <button onClick={addPlace} className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-sm hover:bg-emerald-200">
-          + Add place
-        </button>
-      </div>
-
-      {places.length===0 && <div className="text-sm text-slate-500">Add Home/Work/Gym to see quick forecasts.</div>}
-
-      <div className="grid md:grid-cols-3 gap-3">
-        {places.map(p=>(
-          <div key={p.name} className="rounded-xl bg-white shadow p-3">
-            <div className="font-semibold">{p.name}</div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {(chips[p.name]||[]).map((w,i)=>(
-                <Chip key={i} className="bg-emerald-200 text-emerald-900">
-                  {w.label} • med {Math.round(w.median)}
-                </Chip>
-              ))}
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="text-sm font-medium mb-2">Saved places</div>
+      <ul className="space-y-2">
+        {places.map(p => (
+          <li key={p.id} className="flex items-center justify-between">
+            <div className="text-sm">{p.name}</div>
+            <div className="flex gap-2">
+              <button className="text-indigo-600 hover:underline text-sm" onClick={() => quickCheck(p)}>Check</button>
+              <button className="text-rose-600 hover:underline text-sm" onClick={() => remove(p.id)}>Remove</button>
             </div>
-          </div>
+          </li>
         ))}
+        {!places.length && <li className="text-sm text-slate-500">No saved places.</li>}
+      </ul>
+
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <input placeholder="Name" className="border rounded p-2 text-sm" value={name} onChange={e=>setName(e.target.value)} />
+        <input placeholder="Lat" className="border rounded p-2 text-sm" value={lat} onChange={e=>setLat(e.target.value)} />
+        <input placeholder="Lon" className="border rounded p-2 text-sm" value={lon} onChange={e=>setLon(e.target.value)} />
       </div>
-    </Card>
+      <div className="mt-2">
+        <button onClick={add} className="px-3 py-2 rounded border text-sm">Add place</button>
+      </div>
+
+      {preview && (
+        <div className="mt-3 text-sm rounded-xl border border-slate-200 p-3">
+          <div><b>{preview.place.name}</b>: AQI {preview.aqi} {preview.label ? `• ${preview.label}` : ""}</div>
+        </div>
+      )}
+    </div>
   );
 }
