@@ -1,7 +1,7 @@
 // server/src/index.js
 import express from 'express';
 
-import { cors as corsMw } from './middleware/cors.js';   // <-- alias the named export
+// import { cors as corsMw } from './middleware/cors.js';   // <-- alias the named export
 import { errorHandler, notFound } from './middleware/error.js';
 
 import { ENV } from './config/env.js';
