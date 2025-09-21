@@ -1,5 +1,6 @@
 // server/src/services/ai.service.js
 import { cfChat } from './ai.providers.cloudflare.js';
+import { getNow, bestWindow } from '../services/airQuality.service.js';
 
 // ---------- implementations ----------
 async function adviceImpl({ lat, lon, sensitivity } = {}) {
@@ -10,6 +11,43 @@ async function adviceImpl({ lat, lon, sensitivity } = {}) {
   ];
   const text = await cfChat(messages).catch(e => `AI unavailable: ${e.message || e}`);
   return { text };
+}
+
+async function routeNewImpl({ req, res } = {}) {
+ try {
+    const routes = req.body.routes || [];
+    if (!Array.isArray(routes) || routes.length === 0) {
+      return res.status(400).json({ 
+        error: { code: "BAD_REQUEST", message: "routes[] required" } 
+      });
+    }
+
+    const results = [];
+
+    // 🔑 loop through all incoming route objects
+    for (const r of routes) {
+      const { i, lat, lon, polyline } = r;
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+        results.push({ i, exposure: Infinity, badge: "Invalid coords" });
+        continue;
+      }
+
+      const now = await getNow(lat, lon, {}); // use AQI service
+
+      results.push({
+        i,
+        polyline,
+        exposure: now.aqi,   // AQI as score
+        aqi: now.aqi,
+        badge: now.badge,
+        rationale: now.rationale,
+      });
+    }
+
+    res.json({ results });
+  } catch (e) {
+    next(e);
+  }
 }
 
 async function coachImpl({ entries } = {}) {
@@ -35,7 +73,7 @@ async function weeklyNarrativeImpl({ summary } = {}) {
 export const advice = adviceImpl;
 export const coach = coachImpl;
 export const weeklyNarrative = weeklyNarrativeImpl;
-
+export const routeNew = routeNewImpl;
 // Aliases expected by ai.controller.js:
 export const aiAdvice = adviceImpl;
 export const aiCoach = coachImpl;

@@ -1,6 +1,6 @@
 // server/src/api/ai.controller.js
 import { num } from '../middleware/validate.js';
-import { aiAdvice, aiCoach, aiWeeklyNarrative } from '../services/ai.service.js';
+import { aiAdvice, aiCoach, aiWeeklyNarrative, routeNew } from '../services/ai.service.js';
 
 export function aiController(store) {
   return {
@@ -25,7 +25,16 @@ export function aiController(store) {
         const hours = num(req.query.hours, 12);
         const distanceKm = num(req.query.distanceKm, 5);
         const sensitivity = req.query.sensitivity ? JSON.parse(req.query.sensitivity) : {};
+        const context = req.query.context ? JSON.parse(req.query.context) : {};
         const out = await aiCoach({ lat, lon, hours, distanceKm, sensitivity });
+        res.json(out);
+      } catch (e) { next(e); }
+    },
+
+    routeNew: async (req, res, next) => {
+        console.log("AI Controller: routeNew called");
+      try {
+        const out = await routeNew({ req, res });
         res.json(out);
       } catch (e) { next(e); }
     },

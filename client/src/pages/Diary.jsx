@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '@clerk/clerk-react';
+import { useUser } from "@clerk/clerk-react";
+
 
 const LS_KEY = 'runsafe_diary';
 
@@ -17,7 +19,8 @@ function saveLocal(list) {
 
 export default function Diary() {
 	const { isSignedIn, isLoaded, getToken } = useAuth();
-
+	const { user } = useUser();
+	
 	const [cough, setCough] = useState(0);
 	const [wheeze, setWheeze] = useState(0);
 	const [sob, setSob] = useState(0);
@@ -66,8 +69,10 @@ export default function Diary() {
 	async function handleSave(e) {
 		e.preventDefault();
 		setSaving(true);
+		var email = user.primaryEmailAddress.emailAddress;
 		try {
 			const entry = {
+				userId: email,
 				id: crypto.randomUUID(),
 				ts: Date.now(),
 				cough,
@@ -86,7 +91,7 @@ export default function Diary() {
 			if (isSignedIn) {
 				try {
 					const token = await getToken();
-					await api('/api/diary/log', { method: 'POST', token, body: JSON.stringify(entry) });
+					await api('/api/diary/log', { method: 'POST', token, body: entry });
 					const data = await api('/api/diary/list', { token });
 					if (Array.isArray(data?.entries)) {
 						setAll(data.entries);

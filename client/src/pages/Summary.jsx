@@ -54,20 +54,30 @@ export default function Summary() {
 	}
 
 	async function openPDF() {
-		try {
-			let token;
-			if (isSignedIn) {
-				token = await getToken();
-			}
-			const res = await api('/api/summary/pdf', { token });
-			// If backend returns a URL string, open it. If it returns base64, you’ll adapt here.
-			if (typeof res === 'string') window.open(res, '_blank');
-			else alert('PDF endpoint not returning a URL.');
-		} catch (e) {
-			alert('Open PDF failed.');
-			console.error(e);
-		}
-	}
+  try {
+    let token;
+    if (isSignedIn) {
+      token = await getToken();
+    }
+
+    // Request PDF as blob
+    const res = await fetch('/api/summary/pdf', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const blob = await res.blob(); // <-- PDF binary
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank'); // open in new tab
+
+    // optional: revoke URL after some time
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } catch (e) {
+    alert('Open PDF failed.');
+    console.error(e);
+  }
+}
 
 	return (
 		<div className="min-h-[calc(100vh-56px)] bg-[radial-gradient(900px_600px_at_10%_0%,#e9d5ff33,transparent),radial-gradient(900px_600px_at_90%_0%,#a7f3d033,transparent)]">
@@ -81,9 +91,9 @@ export default function Summary() {
 					</div>
 
 					<div className="mt-6 flex gap-3">
-						<button onClick={downloadFHIR} className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500">
+						{/* <button onClick={downloadFHIR} className="px-4 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-500">
 							Download FHIR JSON
-						</button>
+						</button> */}
 						<button onClick={openPDF} className="px-4 py-2 rounded-xl border hover:bg-slate-50">
 							Open PDF
 						</button>

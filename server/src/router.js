@@ -7,6 +7,7 @@ import { pdfController } from './api/pdf.controller.js';
 import { aiController } from './api/ai.controller.js';
 import { routeController } from './api/route.controller.js'; 
 import { debugController } from './api/debug.controller.js';
+import { fetchAirQuality } from './integrations/openMeteo.client.js';
 
 
 export function createRouter(store) {
@@ -31,11 +32,11 @@ export function createRouter(store) {
 
   const ai = aiController(store);
   r.get('/ai/advice', ai.advice);
-  r.get('/ai/coach', ai.coach);
+  r.post('/ai/coach', ai.routeNew);
   r.get('/summary/weekly/ai', ai.weekly);
 
   const route = routeController();
-  r.get('/route/exposure', route.exposure);
+  //r.get('/route/exposure', route.exposure);
   r.post('/route/exposure/batch', route.batch);
 
   const dbg = debugController();

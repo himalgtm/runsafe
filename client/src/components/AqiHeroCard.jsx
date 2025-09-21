@@ -24,12 +24,12 @@ export default function AqiHeroCard({
   return (
     <div className="rounded-[28px] bg-gradient-to-b from-slate-900 to-slate-800 text-white p-6 md:p-8 shadow-xl border border-slate-700/30">
       {/* Search box */}
-      <div className="flex items-center gap-3">
+      {/* <div className="flex items-center gap-3">
         <input
           placeholder="ZIP Code, City, or State"
           className="w-full md:w-[420px] rounded-xl bg-white/10 border border-white/20 px-4 py-2.5 outline-none placeholder:text-slate-300/70"
         />
-      </div>
+      </div> */}
 
       <div className="mt-6 grid md:grid-cols-2 gap-6 items-center">
         {/* Gauge */}
@@ -52,11 +52,11 @@ export default function AqiHeroCard({
           </div>
 
           {/* Chips row */}
-          <div className="mt-5 grid grid-cols-3 gap-3">
+          {/* <div className="mt-5 grid grid-cols-3 gap-3">
             <Chip title="Forecast AQI" value={forecast} />
             <Chip title="Today" value={today} />
             <Chip title="Tomorrow" value={tomorrow} />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

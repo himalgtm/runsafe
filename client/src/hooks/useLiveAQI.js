@@ -21,7 +21,7 @@ export default function useLiveAQI({ lat, lon, refreshMs = 300000, enabled = tru
     if (!enabled || lat == null || lon == null) return;
     setLoading(true); setError(null);
     try {
-      const res = await api(`/air/now?lat=${lat}&lon=${lon}`);
+      const res = await api(`/api/air/now?lat=${lat}&lon=${lon}`);
       // normalize if server uses different keys
      setData({
   aqi: res.aqi ?? res.aqiNowcast ?? null,
