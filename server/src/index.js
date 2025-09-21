@@ -12,7 +12,7 @@ import { mongoStore } from './data/mongo.store.js';
 import cors from "cors";
 
 const app = express();
-export const corsMw = cors({
+const corsMw = cors({
   origin: [
     "https://runsafe-client.vercel.app", 
     "http://localhost:5173",             
